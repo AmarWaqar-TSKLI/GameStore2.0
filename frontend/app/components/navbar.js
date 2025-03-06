@@ -6,11 +6,8 @@ import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const placeholders = [
-    "What's the first rule of Fight Club?",
-    "Who is Tyler Durden?",
-    "Where is Andrew Laeddis Hiding?",
-    "Write a JavaScript method to reverse a string",
-    "How to assemble your own PC?",
+    "Search for games",
+    "Search for genres",
   ];
 
   const handleChange = (e) => {

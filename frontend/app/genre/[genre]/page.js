@@ -24,7 +24,7 @@ const GenrePage = async ({ params }) => {
       {games.length > 0 ? (
         <ul className="mt-4">
           {games.map((game) => (
-            <li key={game.id} className="p-2 border-b border-gray-700">
+            <li key={game.game_id} className="p-2 border-b border-gray-700">
               {game.name}
             </li>
           ))}

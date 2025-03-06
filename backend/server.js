@@ -42,32 +42,32 @@ app.get('/Wishlist', async (req, res) => {
     res.json(result.recordset);
 });
 
-app.get('/Games/:genre', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games');
-
-    res.json(result.recordset);
-});
-
 app.get('/Games', async (req, res) => {
     const pool = await sql.connect(config);
     const result = await pool.request()
         .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games,Media where Games.game_id = Media.game_id');
+        .query('SELECT * FROM Games JOIN Media ON Games.game_id = Media.game_id');
 
     res.json(result.recordset);
 });
 
 app.get('/games/:genre', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games');
+    try {
+        console.log("Received genre:", req.params.genre); // Debugging
 
-    res.json(result.recordset);
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('genre', sql.VarChar, `%${req.params.genre}%`) // Proper usage
+            .query(`SELECT * FROM Games WHERE genre LIKE @genre`); // Use @genre
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error("Error fetching games:", err); // Log error
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
+
+
 
 // Get game details
 app.get('/game/:gameId', async (req, res) => {
