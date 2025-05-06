@@ -19,3 +19,21 @@ body {
   background: var(--background);
   font-family: "Roboto", serif;
 }
+
+/* Black scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a; /* Dark background */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #444; /* Dark gray scrollbar */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #666; /* Lighter gray on hover */
+}

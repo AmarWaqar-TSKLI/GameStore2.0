@@ -46,7 +46,7 @@ const Menu = ({ width }) => {
         <ul className="w-[100%] text-slate-400 rounded-lg shadow-lg p-2">
           {Navigate.map((item, index) => (
             <li key={item} className="px-6 text-sm py-2 cursor-pointer hover:bg-gray-900 rounded transition duration-200"
-            onClick={() => router.push(`/`)}>
+            onClick={() => router.push(`/wishlist`)}>
               {item}
             </li>
           ))}

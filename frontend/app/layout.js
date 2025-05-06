@@ -1,41 +1,39 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Menu from '../app/components/menu';
-import Navbar from '../app/components/navbar';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata = {
-  title: "GameStore",
-  description: "A NextJs Web App for GameStore",
-};
+// app/layout.js
+"use client";
+import { usePathname } from 'next/navigation';
+import Menu from './components/menu';
+import Navbar from './components/navbar';
+import './globals.css';
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  const isAuthPage = pathname.startsWith('/signin') || pathname.startsWith('/signup');
+
   return (
-    <html lang="en" >
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-        </style>
-        <div className="flex h-screen">
-          <Menu width='w-[20%]' />
-          <div className="content w-[80%] h-screen flex flex-col">
-            <div className="h-[10%] bg-white">
-              <Navbar />
+    <html lang="en">
+      <head>
+        {/* ✅ Roboto Font Embedding */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="font-roboto">
+        {!isAuthPage ? (
+          <div className="flex h-screen overflow-hidden">
+            <Menu width="w-[20%]" />
+            <div className="content w-[80%] h-screen flex flex-col">
+              <div className="h-[10%] bg-white">
+                <Navbar />
+              </div>
+              {children}
             </div>
-            {children}
           </div>
-        </div>
+        ) : (
+          children
+        )}
       </body>
     </html>
   );
