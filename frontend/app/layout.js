@@ -19,12 +19,20 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
           rel="stylesheet"
         />
+        {/* ✅ Favicon */}
+        <link rel="icon" href="/favicon.ico" />
+
+        {/* ✅ Title */}
+        <title>Game Explorer</title>
+
+        {/* ✅ Description */}
+        <meta name="description" content="Your website short description here." />
       </head>
       <body className="font-roboto">
         {!isAuthPage ? (
           <div className="flex h-screen overflow-hidden">
-            <Menu width="w-[20%]" />
-            <div className="content w-[80%] h-screen flex flex-col">
+            <Menu width="w-[15%]" />
+            <div className="content w-[85%] h-screen flex flex-col">
               <div className="h-[10%] bg-white">
                 <Navbar />
               </div>
