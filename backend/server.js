@@ -1,96 +1,345 @@
 const express = require('express');
 const sql = require('mssql');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const config = {
     user: "HP",
     password: "t6k1#90g",
-    server: "DESKTOP-S97IIEF\\SQLEXPRESS",
+    server: "DESKTOP-5HVS36C\\SQLEXPRESS",
     database: "GameStore",
     options: {
         enableArithAbort: true,
-        trustServerCertificate: true,
-        trustedConnection: false,
-        instancename: "SQLEXPRESS"
+        encrypt: false,
+        trustServerCertificate: true
     },
     port: 1433
 };
 
-// this is the code which i know 
-
-// Fetch Books from Database
-app.get('/', async (req, res) => { //Users
+// Fetch Users from Database
+app.get('/Users', async (req, res) => {
     try {
         const pool = await sql.connect(config);
-        const result = await pool.request().query('SELECT * FROM Users'); 
-        res.json(result.recordset); 
+        const result = await pool.request().query('SELECT * FROM Users');
+        res.json(result.recordset);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.get('/Wishlist', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Wishlist,Users WHERE Users.UID = Wishlist.UserID');
-
-    res.json(result.recordset);
-});
-
-app.get('/Games/:genre', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games');
-
-    res.json(result.recordset);
-});
-
 app.get('/Games', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games,Media where Games.game_id = Media.game_id');
+    try {
+        const { page = 1, limit = 18 } = req.query;
+        const offset = (page - 1) * limit;
 
-    res.json(result.recordset);
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('limit', sql.Int, parseInt(limit))
+            .input('offset', sql.Int, parseInt(offset))
+            .query(`
+                SELECT Games.game_id, cover_path, name, genre, description, rating FROM Games 
+                JOIN Media ON Games.game_id = Media.game_id 
+                ORDER BY Games.game_id 
+                OFFSET @offset ROWS 
+                FETCH NEXT @limit ROWS ONLY
+            `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get wishlist games for a user
+app.get('/Wishlist/:userId', async (req, res) => {
+    const userId = req.params.userId;
+    console.log("Received userId:", userId);
+
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query('SELECT * FROM Wishlist, Games, Media WHERE Wishlist.UserID = @userId AND Games.game_id = Wishlist.GameID AND Media.game_id = Wishlist.GameID');
+        console.log("Query executed successfully");
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error("Error fetching wishlist games:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
 app.get('/games/:genre', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('genre', sql.VarChar, req.params.genre)
-        .query('SELECT * FROM Games');
+    try {
+        console.log("Received genre:", req.params.genre);
+        const { page = 1, limit = 18 } = req.query;
+        const offset = (page - 1) * limit;
 
-    res.json(result.recordset);
+        const genreSearch = `%${req.params.genre}%`;
+
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('genre', sql.VarChar, genreSearch)
+            .input('limit', sql.Int, limit)
+            .input('offset', sql.Int, offset)
+            .query(`SELECT M.*, G.name, G.description, G.genre, G.rating FROM Games G
+                    JOIN Media M ON G.game_id = M.game_id 
+                    WHERE G.genre LIKE @genre 
+                    ORDER BY M.game_id 
+                    OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`);
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error("Error fetching games:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
-// Get game details
-app.get('/game/:gameId', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('gameId', sql.Int, req.params.gameId)
-        .query('SELECT * FROM Games WHERE game_id = @gameId');
+app.post('/WishlistInsertion', async (req, res) => {
+    const { user_id, game_id } = req.body;
+    console.log('Incoming Wishlist Request:', req.body);
 
-    res.json(result.recordset[0]);
+    try {
+        const pool = await sql.connect(config);
+
+        const checkResult = await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .input('game_id', sql.Int, game_id)
+            .query('SELECT * FROM Wishlist WHERE UserID = @user_id AND GameID = @game_id');
+
+        if (checkResult.recordset.length > 0) {
+            return res.json({ message: 'Game already in wishlist' });
+        }
+
+        await pool.request()
+            .input('user_id', sql.Int, user_id)
+            .input('game_id', sql.Int, game_id)
+            .query('INSERT INTO Wishlist (UserID, GameID) VALUES (@user_id, @game_id)');
+
+        res.json({ message: 'Game added to wishlist' });
+    } catch (err) {
+        console.error('Error inserting into Wishlist:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
-// Get screenshots for a game
-app.get('/game/:gameId', async (req, res) => {
-    const pool = await sql.connect(config);
-    const result = await pool.request()
-        .input('gameId', sql.Int, req.params.gameId)
-        .query('SELECT * FROM Media WHERE game_id = @gameId');
+// Get all reviews for a specific game with usernames
+app.get('/review/:gameId', async (req, res) => {
+    try {
+        const gameId = req.params.gameId;
+        const pool = await sql.connect(config);
+        
+        const result = await pool.request()
+            .input('gameId', sql.Int, gameId)
+            .query(`
+                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username 
+                FROM Reviews r
+                JOIN Users u ON r.Uid = u.UID
+                WHERE r.GameID = @gameId
+                ORDER BY r.ReviewID DESC
+            `);
 
-    res.json(result.recordset);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching reviews:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
+// server.js
+app.post('/review/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { GameID, Comment, Stars } = req.body;
 
+        // Validate stars (1-5)
+        if (Stars < 1 || Stars > 5) {
+            return res.status(400).json({ error: 'Stars must be between 1 and 5' });
+        }
 
+        const pool = await sql.connect(config);
+        
+        // Check if user already reviewed this game
+        const existingReview = await pool.request()
+            .input('userId', sql.Int, userId)
+            .input('gameId', sql.Int, GameID)
+            .query('SELECT * FROM Reviews WHERE Uid = @userId AND GameID = @gameId');
+
+        if (existingReview.recordset.length > 0) {
+            // Update existing review
+            await pool.request()
+                .input('userId', sql.Int, userId)
+                .input('gameId', sql.Int, GameID)
+                .input('comment', sql.VarChar, Comment)
+                .input('stars', sql.Int, Stars)
+                .query(`
+                    UPDATE Reviews 
+                    SET Comment = @comment, Stars = @stars
+                    WHERE Uid = @userId AND GameID = @gameId
+                `);
+        } else {
+            // Insert new review
+            await pool.request()
+                .input('userId', sql.Int, userId)
+                .input('gameId', sql.Int, GameID)
+                .input('comment', sql.VarChar, Comment)
+                .input('stars', sql.Int, Stars)
+                .query(`
+                    INSERT INTO Reviews (GameID, Uid, Comment, Stars)
+                    VALUES (@gameId, @userId, @comment, @stars)
+                `);
+        }
+
+        // Get the updated reviews with usernames
+        const updatedReviews = await pool.request()
+            .input('gameId', sql.Int, GameID)
+            .query(`
+                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username 
+                FROM Reviews r
+                JOIN Users u ON r.Uid = u.UID
+                WHERE r.GameID = @gameId
+                ORDER BY r.ReviewID DESC
+            `);
+
+        res.status(201).json(updatedReviews.recordset);
+    } catch (err) {
+        console.error('Error submitting review:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/signup', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        const pool = await sql.connect(config);
+
+        const checkEmail = await pool.request()
+            .input('email', sql.VarChar, email)
+            .query('SELECT * FROM Users WHERE Email = @email');
+
+        if (checkEmail.recordset.length > 0) {
+            return res.status(409).json({ error: 'Email already exists. Please use a different one.' });
+        }
+
+        await pool.request()
+            .input('username', sql.VarChar, username)
+            .input('email', sql.VarChar, email)
+            .input('password', sql.VarChar, password)
+            .query('INSERT INTO Users (Username, Email, Password) VALUES (@username, @email, @password)');
+
+        return res.status(201).json({ message: 'User registered successfully!' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Server error during signup' });
+    }
+});
+
+app.post('/signin', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    try {
+        const pool = await sql.connect(config);
+
+        const result = await pool.request()
+            .input('email', sql.VarChar, email)
+            .input('password', sql.VarChar, password)
+            .query('SELECT UID, Username, Email FROM Users WHERE Email = @email AND Password = @password');
+
+        if (result.recordset.length === 0) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const user = result.recordset[0];
+        return res.status(200).json({ message: 'Login successful', user });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error during login' });
+    }
+});
+
+app.delete('/Wishlist/:userId/:gameId', async (req, res) => {
+    try {
+        const userId = parseInt(req.params.userId, 10);
+        const gameId = parseInt(req.params.gameId, 10);
+
+        console.log('Received userId:', userId);
+        console.log('Received gameId:', gameId);
+
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('UserID', sql.Int, userId)
+            .input('GameID', sql.Int, gameId)
+            .query('DELETE FROM Wishlist WHERE UserID = @UserID AND GameID = @GameID');
+
+        if (result.rowsAffected[0] === 0) {
+            res.status(404).json({ error: 'Game not found in wishlist' });
+        } else {
+            res.status(200).json({ message: 'Game removed from wishlist' });
+        }
+    } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/game/:ID', async (req, res) => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('gameId', sql.Int, req.params.ID)
+            .query(`
+                SELECT 
+                    G.game_id, G.name, G.genre, G.description, G.rating,
+                    M.cover_path, M.trailer_url, 
+                    M.screenshot_1, M.screenshot_2, M.screenshot_3, M.screenshot_4, M.screenshot_5
+                FROM Games G
+                JOIN Media M ON G.game_id = M.game_id
+                WHERE G.game_id = @gameId
+            `);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+
+        res.json(result.recordset[0]);
+    } catch (err) {
+        console.error('Error fetching game:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/game/:name/requirements', async (req, res) => {
+    try {
+        const pool = await sql.connect(config);
+        const name = req.params.name;
+        const minReqResult = await pool.request()
+            .input('name', sql.VarChar, name)
+            .query('SELECT * FROM MinReq WHERE name = @name');
+
+        const maxReqResult = await pool.request()
+            .input('name', sql.VarChar, name)
+            .query('SELECT * FROM MaxReq WHERE name = @name');
+
+        res.json({
+            min: minReqResult.recordset[0] || null,
+            max: maxReqResult.recordset[0] || null
+        });
+    } catch (err) {
+        console.error('Error fetching requirements:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 app.get('/', (req, res) => {
     return res.send('Hello World');

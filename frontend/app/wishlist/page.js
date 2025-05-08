@@ -95,6 +95,7 @@ const WishlistPage = () => {
                     {games.length > 0 ? (
                         games.map((game) => (
                             <div
+                            onClick={() => router.push(`/gameinfo/${game.game_id[0]}`)}
                                 key={game.game_id}
                                 className="relative cursor-pointer group text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group"
                             >

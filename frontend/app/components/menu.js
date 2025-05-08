@@ -214,7 +214,7 @@ const Menu = ({ width }) => {
 
       {/* Social */}
       <div className="my-4 flex flex-col items-center">
-        <p className="w-[100%] text-center text-gray-400 text-sm mb-3 tracking-wider">CONNECT WITH US</p>
+        <p className="w-[100%] text-center text-gray-400 text-sm mb-3 tracking-wider">FOLLOW US</p>
         <div className="w-[100%] flex gap-x-4 items-center justify-center">
           {[
             { icon: <IconBrandYoutubeFilled size={24} />, color: "text-red-600" },

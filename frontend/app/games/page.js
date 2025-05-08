@@ -1,4 +1,3 @@
-// app/games/page.js
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -10,20 +9,23 @@ const Page = () => {
     const [filteredGames, setFilteredGames] = useState([]);
     const [wishlistMap, setWishlistMap] = useState({});
     const [page, setPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(true);
     const limit = 18;
     const scrollRef = useRef(null);
     const searchParams = useSearchParams();
     const router = useRouter();
     const searchQuery = searchParams.get('search') || '';
 
-    const fetchGames = (pageNumber) => {
-        fetch(`http://localhost:1000/Games?page=${pageNumber}&limit=${limit}`)
-            .then((response) => response.json())
-            .then((data) => {
-                setGames(data || []);
-                filterGames(data || [], searchQuery);
-            })
-            .catch((error) => console.error("Error fetching data:", error));
+    const fetchGames = async (pageNumber) => {
+        try {
+            const response = await fetch(`http://localhost:1000/Games?page=${pageNumber}&limit=${limit}`);
+            const data = await response.json();
+            setGames(data || []);
+            filterGames(data || [], searchQuery);
+            setHasNextPage(data?.length === limit);
+        } catch (error) {
+            console.error("Error fetching games:", error);
+        }
     };
 
     const filterGames = (gamesList, query) => {
@@ -41,7 +43,9 @@ const Page = () => {
         router.push('/games');
     };
 
-    const handleAddToWishlist = (game) => {
+    const handleAddToWishlist = (game, e) => {
+        e.stopPropagation();
+
         if (!isAuthenticated()) {
             router.push(`/signin?returnUrl=${encodeURIComponent(window.location.pathname)}`);
             return;
@@ -103,45 +107,68 @@ const Page = () => {
                 </div>
             )}
 
+            <h1 className="text-2xl font-bold p-4 text-white">All Games</h1>
+
             <div ref={scrollRef} className="flex-grow overflow-y-auto p-3 custom-scrollbar">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {filteredGames.map((game) => (
-                        <div
-                        onClick={() => router.push(`/gameinfo/${game.game_id}`)}
-                        key={game.game_id} className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group">
-                            <div className="w-full">
-                                <img src={game.cover_path} className="object-cover w-full h-[242px] rounded-t-lg" alt={game.name} />
-                            </div>
-
-                            <div
-                                className="absolute top-0 right-3 opacity-0 group-hover:opacity-100 group-hover:top-3 transition-all hover:scale-125 duration-300 z-10"
-                                onClick={() => handleAddToWishlist(game)}
-                                title={wishlistMap[game.game_id] ? "Added" : "Add to wishlist"}
+                    {filteredGames.length > 0 ? (
+                        filteredGames.map((game) => (
+                            <div 
+                                onClick={() => router.push(`/gameinfo/${game.game_id}`)}
+                                key={game.game_id}
+                                className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group"
                             >
-                                {wishlistMap[game.game_id] ? (
-                                    // Tick icon
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24" height="24">
-                                        <path d="M20.285 6.709l-11.607 11.607-5.657-5.657 1.414-1.414 4.243 4.243 10.193-10.193z" />
-                                    </svg>
-                                ) : (
-                                    // Plus icon
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
-                                        <rect width="24" height="24" fill="black" />
-                                        <path d="M12 8V16M16 12H8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                )}
-                            </div>
+                                <div className="w-full">
+                                    <img 
+                                        src={game.cover_path} 
+                                        className="object-cover w-full h-[242px] rounded-t-lg" 
+                                        alt={game.name} 
+                                    />
+                                </div>
 
-                            <div className="pt-2 pb-2 pl-2 text-[18px]">
-                                <h1>{game.name}</h1>
+                                <div
+                                    className="absolute top-0 right-3 opacity-0 group-hover:opacity-100 group-hover:top-3 transition-all hover:scale-125 duration-300 z-10"
+                                    onClick={(e) => handleAddToWishlist(game, e)}
+                                    title={wishlistMap[game.game_id] ? "Added" : "Add to wishlist"}
+                                >
+                                    {wishlistMap[game.game_id] ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24" height="24">
+                                            <path d="M20.285 6.709l-11.607 11.607-5.657-5.657 1.414-1.414 4.243 4.243 10.193-10.193z" />
+                                        </svg>
+                                    ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
+                                            <rect width="24" height="24" fill="black" />
+                                            <path d="M12 8V16M16 12H8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    )}
+                                </div>
+
+                                <div className="pt-2 pb-2 pl-2 text-[18px]">
+                                    <h1>{game.name}</h1>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <p className="mt-4 text-gray-400 col-span-full">No games found.</p>
+                    )}
                 </div>
+
                 {!searchQuery && filteredGames.length > 0 && (
                     <div className="w-full flex justify-center gap-4 p-6">
-                        <a onClick={() => setPage((prev) => Math.max(prev - 1, 1))} className={`cursor-pointer px-4 py-2 bg-gray-700 rounded ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`} disabled={page === 1}>Previous</a>
-                        <a onClick={() => setPage((prev) => prev + 1)} className="cursor-pointer px-4 py-2 bg-gray-700 rounded">Next</a>
+                        <button
+                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                            className={`cursor-pointer px-4 py-2 bg-gray-700 rounded ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                            disabled={page === 1}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => setPage((prev) => prev + 1)}
+                            className={`cursor-pointer px-4 py-2 bg-gray-700 rounded ${!hasNextPage ? "opacity-50 cursor-not-allowed" : ""}`}
+                            disabled={!hasNextPage}
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
             </div>

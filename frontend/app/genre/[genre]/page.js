@@ -14,6 +14,7 @@ const GenrePage = () => {
     const [filteredGames, setFilteredGames] = useState([]);
     const [wishlistMap, setWishlistMap] = useState({});
     const [page, setPage] = useState(1);
+    const [hasNextPage, setHasNextPage] = useState(true);
     const limit = 18;
     const scrollRef = useRef(null);
 
@@ -24,6 +25,7 @@ const GenrePage = () => {
             const data = await response.json();
             setGames(data || []);
             filterGames(data || [], searchQuery);
+            setHasNextPage(data?.length === limit); // Disable "Next" if fewer than 18 games returned
         } catch (error) {
             console.error("Error fetching genre games:", error);
         }
@@ -112,14 +114,21 @@ const GenrePage = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                     {filteredGames.length > 0 ? (
                         filteredGames.map((game) => (
-                            <div key={game.game_id} className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group">
+                            <div 
+                                onClick={() => router.push(`/gameinfo/${game.game_id}`)}
+                                key={game.game_id}
+                                className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group"
+                            >
                                 <div className="w-full">
                                     <img src={`\\${game.cover_path}`} className="object-cover w-full h-[242px] rounded-t-lg" alt={game.name} />
                                 </div>
 
                                 <div
                                     className="absolute top-0 right-3 opacity-0 group-hover:opacity-100 group-hover:top-3 transition-all hover:scale-125 duration-300 z-10"
-                                    onClick={() => handleAddToWishlist(game)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddToWishlist(game);
+                                    }}
                                     title={wishlistMap[game.game_id] ? "Added" : "Add to wishlist"}
                                 >
                                     {wishlistMap[game.game_id] ? (
@@ -155,7 +164,8 @@ const GenrePage = () => {
                         </button>
                         <button
                             onClick={() => setPage((prev) => prev + 1)}
-                            className="cursor-pointer px-4 py-2 bg-gray-700 rounded"
+                            className={`cursor-pointer px-4 py-2 bg-gray-700 rounded ${!hasNextPage ? "opacity-50 cursor-not-allowed" : ""}`}
+                            disabled={!hasNextPage}
                         >
                             Next
                         </button>

@@ -30,9 +30,12 @@ export default function RootLayout({ children }) {
       </head>
       <body className="font-roboto">
         {!isAuthPage ? (
-          <div className="flex h-screen overflow-hidden">
-            <Menu width="w-[15%]" />
-            <div className="content w-[85%] h-screen flex flex-col">
+          <div className="flex h-[100vh] ">
+            <div className='w-[15%] overflow-hidden'>
+
+            <Menu width="w-[100%]" />
+            </div>
+            <div className="content w-[85%] h-screen flex flex-col overflow-y-auto">
               <div className="h-[10%] bg-white">
                 <Navbar />
               </div>
