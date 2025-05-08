@@ -33,3 +33,10 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #666; /* Lighter gray on hover */
 }
+/* Add this to your global CSS */
+.html5-video-player.ytp-autohide .ytp-pause-overlay,
+.ytp-pause-overlay-container {
+  display: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+}

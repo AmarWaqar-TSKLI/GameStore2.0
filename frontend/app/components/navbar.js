@@ -36,7 +36,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="bg-black w-full h-full flex items-center justify-between px-5">
+    <div className="bg-black w-full h-full flex items-center justify-between px-5 py-2">
       <div className="flex w-[80%]">
         <div
           onClick={() => router.push(`/`)}
@@ -79,7 +79,7 @@ const Navbar = () => {
             <span className="text-white w-40  font-semibold text-sm sm:text-base">
               Welcome, {user.Username}!
             </span>
-            <a onClick={ handleLogout} className="cursor-pointer relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border-gray-100 rounded-lg shadow-inner group">
+            <a onClick={ handleLogout} className="cursor-pointer relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border-gray-600 rounded-lg group">
               <span className="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
               <span className="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
               <span className="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>

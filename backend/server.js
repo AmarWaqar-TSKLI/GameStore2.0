@@ -10,7 +10,7 @@ app.use(express.json());
 const config = {
     user: "HP",
     password: "t6k1#90g",
-    server: "DESKTOP-5HVS36C\\SQLEXPRESS",
+    server: "DESKTOP-S97IIEF\\SQLEXPRESS",
     database: "GameStore",
     options: {
         enableArithAbort: true,
@@ -31,6 +31,7 @@ app.get('/Users', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 app.get('/Games', async (req, res) => {
     try {
@@ -138,7 +139,7 @@ app.get('/review/:gameId', async (req, res) => {
         const result = await pool.request()
             .input('gameId', sql.Int, gameId)
             .query(`
-                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username 
+                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username, u.UID
                 FROM Reviews r
                 JOIN Users u ON r.Uid = u.UID
                 WHERE r.GameID = @gameId

@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
 
             <Menu width="w-[100%]" />
             </div>
-            <div className="content w-[85%] h-screen flex flex-col overflow-y-auto">
+            <div className="content w-[85%] h-screen flex flex-col overflow-y-auto custom-scrollbar">
               <div className="h-[10%] bg-white">
                 <Navbar />
               </div>
