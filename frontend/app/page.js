@@ -35,11 +35,11 @@ export default function Home() {
 
   return (
     <>
-      <div className="flex flex-col bg-slate-950 h-screen w-[100%] overflow-y-scroll overflow-x-hidden items-center rounded-l-md">
+      <div className="flex flex-col bg-slate-950  h-screen w-[100%] overflow-y-hidden custom-scrollbar overflow-x-hidden items-center rounded-l-md pt-5">
         <TypewriterEffectSmooth words = {words}/>
         <p className="text-slate-400 text-xl -mt-5 font-semibold ">Explore a vast library of games, track your favorites, and build the perfect wishlist for your next adventure.</p>
         <h1 className="text-white text-5xl font-bold w-[67%] mt-10">Trending Games</h1>
-        <div className='flex flex-col items-center justify-center max-lg:mt-10 pt-6 w-[100%] h-screen'>
+        <div className='flex flex-col items-center justify-center max-lg:mt-10 pt-6 w-[100%]'>
           <Carousel
           />
         </div>

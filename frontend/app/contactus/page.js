@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -21,6 +21,14 @@ export default function ContactUs() {
     email: '',
     message: ''
   });
+
+  const [isMounted, setIsMounted] = useState(false);
+
+useEffect(() => {
+  setIsMounted(true);
+}, []);
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,7 +77,7 @@ export default function ContactUs() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -90,9 +98,9 @@ export default function ContactUs() {
       const data = await response.json();
 
       if (response.ok) {
-        setSubmitStatus({ 
-          success: true, 
-          message: 'Thank you! Your message has been sent successfully.' 
+        setSubmitStatus({
+          success: true,
+          message: 'Thank you! Your message has been sent successfully.'
         });
         setFormData({
           name: '',
@@ -104,21 +112,27 @@ export default function ContactUs() {
         throw new Error(data.message || 'Submission failed');
       }
     } catch (error) {
-      setSubmitStatus({ 
-        success: false, 
-        message: error.message || 'Something went wrong. Please try again later.' 
+      setSubmitStatus({
+        success: false,
+        message: error.message || 'Something went wrong. Please try again later.'
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!isMounted) {
+  return <div className="flex items-center justify-center h-screen">Loading...</div>;
+}
+
   return (
     <div className="h-full overflow-y-auto custom-scrollbar bg-slate-950 text-white p-10 flex flex-col justify-between">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
+
         className="text-center mb-5"
       >
         <div className="flex justify-center mb-4">
@@ -162,9 +176,8 @@ export default function ContactUs() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${
-                  errors.name ? 'border-red-500' : 'border-gray-600'
-                }`}
+                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${errors.name ? 'border-red-500' : 'border-gray-600'
+                  }`}
                 placeholder="Enter your name"
               />
               {errors.name && (
@@ -188,9 +201,8 @@ export default function ContactUs() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${
-                  errors.email ? 'border-red-500' : 'border-gray-600'
-                }`}
+                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${errors.email ? 'border-red-500' : 'border-gray-600'
+                  }`}
                 placeholder="your.email@example.com"
               />
               {errors.email && (
@@ -235,9 +247,8 @@ export default function ContactUs() {
                 rows={5}
                 value={formData.message}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${
-                  errors.message ? 'border-red-500' : 'border-gray-600'
-                }`}
+                className={`w-full px-4 py-2 bg-gray-700 border rounded-lg focus:ring-purple-500 focus:border-purple-500 text-white ${errors.message ? 'border-red-500' : 'border-gray-600'
+                  }`}
                 placeholder="Your message here..."
               ></textarea>
               {errors.message && (
@@ -249,11 +260,10 @@ export default function ContactUs() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`p-3 rounded-lg text-sm ${
-                  submitStatus.success 
-                    ? 'bg-green-900/50 text-green-300' 
-                    : 'bg-red-900/50 text-red-300'
-                }`}
+                className={`p-3 rounded-lg text-sm ${submitStatus.success
+                  ? 'bg-green-900/50 text-green-300'
+                  : 'bg-red-900/50 text-red-300'
+                  }`}
               >
                 {submitStatus.message}
               </motion.div>
@@ -270,11 +280,10 @@ export default function ContactUs() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-lg flex items-center justify-center ${
-                  isSubmitting
-                    ? 'opacity-70 cursor-not-allowed'
-                    : 'hover:from-purple-700 hover:to-indigo-700 hover:shadow-purple-500/30'
-                }`}
+                className={`w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-lg flex items-center justify-center ${isSubmitting
+                  ? 'opacity-70 cursor-not-allowed'
+                  : 'hover:from-purple-700 hover:to-indigo-700 hover:shadow-purple-500/30'
+                  }`}
               >
                 {isSubmitting ? (
                   <>
@@ -294,14 +303,14 @@ export default function ContactUs() {
 
         <motion.div
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
           className="mt-12 text-center"
         >
           <h3 className="text-xl font-bold mb-4">Other Ways to Reach Us</h3>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8">
-            <a 
-              href="mailto:gxplorer.contact@gmail.com" 
+            <a
+              href="mailto:gxplorer.contact@gmail.com"
               className="text-purple-400 hover:text-purple-300 transition-colors flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -310,8 +319,8 @@ export default function ContactUs() {
               gxplorer.contact@gmail.com
             </a>
             <span className="text-gray-500 hidden sm:block">|</span>
-            <a 
-              href="tel:+923324261648" 
+            <a
+              href="tel:+923324261648"
               className="text-purple-400 hover:text-purple-300 transition-colors flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -325,8 +334,8 @@ export default function ContactUs() {
 
       <motion.div
         initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
         className="mt-16 text-center text-slate-400"
       >
         <p>&copy; 2025 GameStore. All rights reserved.</p>

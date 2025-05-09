@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
+
 const teamMembers = [
   {
     name: 'Haseeb Ahmed',
@@ -18,12 +20,23 @@ const teamMembers = [
 ];
 
 export default function AboutUs() {
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
   return (
     <div className="h-full overflow-hidden bg-slate-950 text-white p-10 flex flex-col justify-between">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
         className="text-center mb-5"
       >
         <div className="flex justify-center mb-4">
@@ -78,7 +91,8 @@ export default function AboutUs() {
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        viewport={{ once: true }}
         className="mt-16 text-center text-slate-400"
       >
         <p>&copy; 2025 GameStore. All rights reserved.</p>

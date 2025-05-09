@@ -1,5 +1,6 @@
 "use client";
 import { IconArrowNarrowRight } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useId, useEffect } from "react";
 
 const Slide = ({ game, index, current, handleSlideClick }) => {
@@ -66,9 +67,8 @@ const Slide = ({ game, index, current, handleSlideClick }) => {
           {current === index && <div className="absolute inset-0 bg-black/30 transition-all duration-1000" />}
         </div>
         <article
-          className={`w-[150%] h-[60%] relative p-[4vmin] transition-opacity duration-1000 ease-in-out ${
-            current === index ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}>
+          className={`w-[150%] h-[60%] relative p-[4vmin] transition-opacity duration-1000 ease-in-out ${current === index ? "opacity-100 visible" : "opacity-0 invisible"
+            }`}>
           <h2 className="text-lg md:text-2xl lg:text-4xl font-semibold absolute bottom-5">{game.name}</h2>
         </article>
       </li>
@@ -79,9 +79,8 @@ const Slide = ({ game, index, current, handleSlideClick }) => {
 const CarouselControl = ({ type, title, handleClick }) => {
   return (
     <button
-      className={`w-10 h-10 flex items-center mx-2 justify-center bg-neutral-200 dark:bg-neutral-800 border-3 border-transparent rounded-full focus:border-[#6D64F7] focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200 ${
-        type === "previous" ? "rotate-180" : ""
-      }`}
+      className={`w-10 h-10 flex items-center mx-2 justify-center bg-neutral-200 dark:bg-neutral-800 border-3 border-transparent rounded-full focus:border-[#6D64F7] focus:outline-none hover:-translate-y-0.5 active:translate-y-0.5 transition duration-200 ${type === "previous" ? "rotate-180" : ""
+        }`}
       title={title}
       onClick={handleClick}>
       <IconArrowNarrowRight className="text-neutral-600 dark:text-neutral-200" />
@@ -93,6 +92,7 @@ export function Carousel() {
   const [games, setGames] = useState([]);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch("http://localhost:1000/Games")
@@ -124,6 +124,9 @@ export function Carousel() {
   };
 
   const handleSlideClick = (index) => {
+    if (current == index) {
+    router.push(`/gameinfo/${games[index].game_id}`); // Use games[index] to get the current game
+    }
     setCurrent(index);
     resetTimer();
   };
@@ -140,10 +143,10 @@ export function Carousel() {
   const id = useId();
 
   return (
-    <div className="relative w-[80vmin] h-[70vmin] mx-auto" aria-labelledby={`carousel-heading-${id}`}>
+    <div className="relative w-[80vmin] h-[60vh] mx-auto" aria-labelledby={`carousel-heading-${id}`}>
       <ul
         className="absolute flex gap-x-36 mx-[-6vmin] transition-transform duration-1000 ease-in-out"
-        style={{ transform: `translateX(-${current * (100 / games.length)}%)` }}>
+        style={{ transform: `translateX(calc(-${current * (100 / games.length)}% - ${current * 1}vmin - 0.2% ))` }}>
         {games.map((game, index) => (
           <Slide key={game.game_id} game={game} index={index} current={current} handleSlideClick={handleSlideClick} />
         ))}

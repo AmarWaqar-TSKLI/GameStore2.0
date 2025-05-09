@@ -26,11 +26,11 @@ const Menu = ({ width }) => {
           setSelectedNavItem(null); // Clear any navigation selection
         }
       }
-    } 
+    }
     // Check for navigation items
     else {
       setSelectedGenre(null); // Clear genre selection
-      
+
       // Handle exact matches for navigation items
       if (pathname === "/") {
         setSelectedNavItem("Home");
@@ -38,12 +38,12 @@ const Menu = ({ width }) => {
         const navItem = Navigate.find(item => {
           // For Home, we already checked exact match
           if (item === "Home") return false;
-          
+
           // For other items, check exact match or starts with followed by /
           const itemPath = `/${item.toLowerCase()}`;
           return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
         });
-        
+
         if (navItem) {
           setSelectedNavItem(navItem);
         } else {
@@ -77,12 +77,14 @@ const Menu = ({ width }) => {
 
   return (
     <div
-      className={`${width} bg-gradient-to-b from-black to-gray-900 flex flex-col border-r border-gray-800 transition-all duration-500 ${isHovering ? 'shadow-2xl shadow-red-900/30' : ''}`}
+      className={`${width} h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col border-r border-gray-800 transition-all duration-500 ${isHovering ? 'shadow-2xl shadow-red-900/30' : ''}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* Logo with animation */}
-      <div className="logo flex items-center justify-center h-[10%] py-4 group">
+      <div className="logo flex items-center justify-center h-[10%] py-4 group cursor-pointer"
+        onClick={() => router.push(`/`)}
+      >
         <img
           src="/Logo.svg"
           alt="Logo"
@@ -160,12 +162,14 @@ const Menu = ({ width }) => {
               onClick={() => {
                 setSelectedNavItem(item); // Set persistent active state
                 setActiveItem(item); // Set temporary pulse effect
-                {if(item == 'Home'){
-                  router.push(`/`);
+                {
+                  if (item == 'Home') {
+                    router.push(`/`);
+                  }
+                  else {
+                    router.push(`/${item.toLowerCase()}`);
+                  }
                 }
-              else{
-                router.push(`/${item.toLowerCase()}`);
-              }}
               }}
               className={`px-4 py-2 cursor-pointer rounded-md transition-all duration-300 relative overflow-hidden group
                 ${selectedNavItem === item
@@ -178,19 +182,19 @@ const Menu = ({ width }) => {
               <div className={`absolute inset-0 bg-gradient-to-r from-blue-900/10 to-transparent 
                 ${selectedNavItem === item ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'} 
                 transition-opacity duration-300`}></div>
-              
+
               <span className={`relative z-10 text-sm font-medium transition-all duration-300 transform 
                 ${selectedNavItem === item ? "scale-105 translate-x-1" : ""} 
                 group-hover:translate-x-2 flex items-center`}>
-                
+
                 {/* Bullet point - stays active when selected */}
                 <span className={`inline-block w-2 h-2 rounded-full mr-3 transition-all duration-300 
-                  ${selectedNavItem === item 
-                    ? "bg-blue-500 scale-125 shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]" 
+                  ${selectedNavItem === item
+                    ? "bg-blue-500 scale-125 shadow-[0_0_8px_2px_rgba(59,130,246,0.5)]"
                     : "bg-gray-600 group-hover:bg-blue-400 group-hover:scale-100"}`}></span>
                 {item}
               </span>
-              
+
               {/* Arrow - shows for both active and hover states */}
               <span className={`absolute right-4 top-1/2 transform -translate-y-1/2 
                 ${selectedNavItem === item ? "text-blue-400" : "text-red-500"} 

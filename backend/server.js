@@ -141,7 +141,7 @@ app.get('/review/:gameId', async (req, res) => {
         const result = await pool.request()
             .input('gameId', sql.Int, gameId)
             .query(`
-                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username, u.UID
+                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username, u.UID, r.Date
                 FROM Reviews r
                 JOIN Users u ON r.Uid = u.UID
                 WHERE r.GameID = @gameId
@@ -183,7 +183,7 @@ app.post('/review/:userId', async (req, res) => {
                 .input('stars', sql.Int, Stars)
                 .query(`
                     UPDATE Reviews 
-                    SET Comment = @comment, Stars = @stars
+                    SET Comment = @comment, Stars = @stars, Date = CAST(GETDATE() AS DATE)
                     WHERE Uid = @userId AND GameID = @gameId
                 `);
         } else {
@@ -194,8 +194,8 @@ app.post('/review/:userId', async (req, res) => {
                 .input('comment', sql.VarChar, Comment)
                 .input('stars', sql.Int, Stars)
                 .query(`
-                    INSERT INTO Reviews (GameID, Uid, Comment, Stars)
-                    VALUES (@gameId, @userId, @comment, @stars)
+                    INSERT INTO Reviews (GameID, Uid, Comment, Stars, Date)
+                    VALUES (@gameId, @userId, @comment, @stars, CAST(GETDATE() AS DATE))
                 `);
         }
 
@@ -203,7 +203,7 @@ app.post('/review/:userId', async (req, res) => {
         const updatedReviews = await pool.request()
             .input('gameId', sql.Int, GameID)
             .query(`
-                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username 
+                SELECT r.ReviewID, r.GameID, r.Comment, r.Stars, u.Username, u.UID, r.Date
                 FROM Reviews r
                 JOIN Users u ON r.Uid = u.UID
                 WHERE r.GameID = @gameId

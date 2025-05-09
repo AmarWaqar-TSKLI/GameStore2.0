@@ -174,9 +174,7 @@ export default function GameDetailsPage() {
         try {
             const response = await fetch(`http://localhost:1000/review/${user.UID}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     GameID: game.game_id,
                     Comment: newReview.comment,
@@ -191,25 +189,28 @@ export default function GameDetailsPage() {
                 return;
             }
 
-            // Refresh reviews after successful submission
-            const res = await fetch(`http://localhost:1000/review/${game.game_id}`);
-            const data = await res.json();
-            setReviews(data);
-
-            // Update user review state
-            const updatedUserReview = data.find(r => r.Uid === user.UID);
-            setUserReview(updatedUserReview);
-
-            // Show success message
-            toast.success(userReview ? 'Review updated successfully!' : 'Review submitted successfully!');
-
-            // Reset form if it was a new review
-            if (!userReview) {
-                setNewReview({ comment: '', stars: 0 });
+            // Find the current user's review in the response
+            const currentUserReview = result.find(r => r.UID === user.UID);
+            console.log(currentUserReview, result)
+            if (!currentUserReview) {
+                throw new Error("Failed to find submitted review in response");
             }
+
+            // Update both reviews list and userReview state
+            setReviews(result);
+            setUserReview(currentUserReview);
+
+            // Update the form fields immediately with the submitted values
+            setNewReview({
+                comment: currentUserReview.Comment,
+                stars: currentUserReview.Stars
+            });
+
+            toast.success('Review submitted successfully!');
+
         } catch (error) {
-            console.error("Error submitting review:", error);
-            toast.error('An error occurred while submitting your review');
+            console.error("Error:", error);
+            toast.error('Submission failed');
         } finally {
             setIsSubmitting(false);
         }
@@ -283,7 +284,7 @@ export default function GameDetailsPage() {
     if (!game) return <div className="text-white p-10">Loading... {id}</div>;
 
     return (
-        <div className="bg-[#0b0c10] text-white w-full">
+        <div className="bg-[#0b0c10] text-white w-full h-screen">
             <ToastContainer position="bottom-right" autoClose={3000} />
 
             {/* GAME HEADER SECTION */}
@@ -383,8 +384,8 @@ export default function GameDetailsPage() {
                         <button
                             onClick={handleWishlistClick}
                             className={`mt-4 py-3 px-4 rounded-lg font-semibold w-full transition-all duration-300 ${isInWishlist
-                                    ? 'bg-green-700 text-white cursor-default'
-                                    : 'bg-indigo-600 shadow-lg hover:bg-indigo-700 hover:shadow-indigo-500/20 text-white'
+                                ? 'bg-green-700 text-white cursor-default'
+                                : 'bg-indigo-600 shadow-lg hover:bg-indigo-700 hover:shadow-indigo-500/20 text-white'
                                 }`}
                         >
                             {isInWishlist ? '✓ Added to Wishlist' : 'Add to Wishlist'}
@@ -587,7 +588,7 @@ export default function GameDetailsPage() {
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-lg text-gray-100">{review.Username || 'Anonymous'}</h4>
-                                            <div className="flex items-center mt-1">
+                                            <div className="flex items-center mt-1 justify-center align-middle">
                                                 <div className="flex mr-2">
                                                     {[1, 2, 3, 4, 5].map((star) => (
                                                         <span key={star} className="text-yellow-400">
@@ -600,7 +601,7 @@ export default function GameDetailsPage() {
                                                     ))}
                                                 </div>
                                                 <span className="text-xs text-gray-500">
-                                                    {new Date(review.CreatedAt).toLocaleDateString()}
+                                                    {new Date(review.Date).toLocaleDateString('en-GB')}
                                                 </span>
                                             </div>
                                         </div>
