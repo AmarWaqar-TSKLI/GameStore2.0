@@ -26,6 +26,7 @@ export default function GameDetailsPage() {
     const reviewInputRef = useRef(null);
     // Add these to your component's state and refs
     const [isTrailerPlaying, setIsTrailerPlaying] = useState(true);
+    const [isInWishlist, setIsInWishlist] = useState(false);
 
     // Add this useEffect to handle play/pause state changes
     useEffect(() => {
@@ -228,6 +229,57 @@ export default function GameDetailsPage() {
         return (sum / reviews.length).toFixed(1);
     };
 
+    useEffect(() => {
+        const checkWishlist = async () => {
+            if (!isAuthenticated()) return;
+
+            const user = getCurrentUser();
+            try {
+                const res = await fetch(`http://localhost:1000/wishlist/${user.UID}`);
+                if (!res.ok) throw new Error("Failed to fetch wishlist");
+
+                const wishlist = await res.json();
+                const exists = wishlist.some(w => w.GameID === game.game_id);
+                setIsInWishlist(exists);
+            } catch (err) {
+                console.error("Wishlist fetch error:", err);
+            }
+        };
+
+        if (game?.game_id) {
+            checkWishlist();
+        }
+    }, [game]);
+
+    const handleWishlistClick = async () => {
+        if (!isAuthenticated()) {
+            router.push(`/signin?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+            return;
+        }
+
+        if (isInWishlist) return; // Already added
+
+        const user = getCurrentUser();
+        try {
+            const res = await fetch("http://localhost:1000/WishlistInsertion", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: user.UID, game_id: game.game_id }),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Failed to add to wishlist');
+
+            setIsInWishlist(true);
+            toast.success('Added to wishlist!');
+        } catch (err) {
+            console.error("Add to wishlist error:", err);
+            toast.error('Could not add to wishlist');
+        }
+    };
+
+
+
+
     if (!game) return <div className="text-white p-10">Loading... {id}</div>;
 
     return (
@@ -328,9 +380,16 @@ export default function GameDetailsPage() {
                             >{game.description}</p>
                         </div>
 
-                        <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-indigo-500/20">
-                            Add to Library
+                        <button
+                            onClick={handleWishlistClick}
+                            className={`mt-4 py-3 px-4 rounded-lg font-semibold w-full transition-all duration-300 ${isInWishlist
+                                    ? 'bg-green-700 text-white cursor-default'
+                                    : 'bg-indigo-600 shadow-lg hover:bg-indigo-700 hover:shadow-indigo-500/20 text-white'
+                                }`}
+                        >
+                            {isInWishlist ? '✓ Added to Wishlist' : 'Add to Wishlist'}
                         </button>
+
                     </div>
                 </div>
             </div>

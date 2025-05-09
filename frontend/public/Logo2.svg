@@ -4,7 +4,7 @@
 		.s0 { opacity: .8;fill: #fe5252 } 
 		.s1 { opacity: .8;fill: #1b2939 } 
 		.s2 { opacity: .8;fill: #788aa3 } 
-		.s3 { fill: #fe5252 } 
+		.s3 { fill: #c1cdda } 
 	</style>
 	<path fill-rule="evenodd" class="s0" d="m20 0h48c11 0 20 9 20 20v45c0 11-9 20-20 20h-48c-11 0-20-9-20-20v-45c0-11 9-20 20-20z"/>
 	<path fill-rule="evenodd" class="s1" d="m79 69h48c11 0 20 9 20 20v45c0 11-9 20-20 20h-48c-11 0-20-9-20-20v-45c0-11 9-20 20-20z"/>

@@ -97,7 +97,7 @@ const WishlistPage = () => {
                             <div
                             onClick={() => router.push(`/gameinfo/${game.game_id[0]}`)}
                                 key={game.game_id}
-                                className="relative cursor-pointer group text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group"
+                                className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] hover:shadow-xl hover:shadow-purple-500/20 bg-black rounded-lg group"
                             >
                                 <div
                                     className="absolute top-0 right-3 opacity-0 group-hover:opacity-100 group-hover:top-3 transition-all hover:scale-125 duration-300 z-10"
@@ -129,7 +129,7 @@ const WishlistPage = () => {
                                 <div className="w-full">
                                     <img
                                         src={game.cover_path}
-                                        className="object-cover w-full h-[242px] rounded-t-lg"
+                                        className="object-cover w-full h-[280px] rounded-t-lg"
                                         alt={game.name}
                                     />
                                 </div>

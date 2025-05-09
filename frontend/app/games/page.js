@@ -116,12 +116,12 @@ const Page = () => {
                             <div 
                                 onClick={() => router.push(`/gameinfo/${game.game_id}`)}
                                 key={game.game_id}
-                                className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] bg-black rounded-lg group"
+                                className="relative cursor-pointer text-white transition duration-300 hover:translate-y-[-6px] hover:shadow-xl hover:shadow-purple-500/20 bg-black rounded-lg group"
                             >
                                 <div className="w-full">
                                     <img 
                                         src={game.cover_path} 
-                                        className="object-cover w-full h-[242px] rounded-t-lg" 
+                                        className="object-cover w-full h-[280px] rounded-t-lg" 
                                         alt={game.name} 
                                     />
                                 </div>
