@@ -78,13 +78,14 @@ export default function ContactUs() {
     setSubmitStatus({ success: false, message: '' });
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('http://localhost:1000/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
+      console.log(JSON.stringify(formData))
 
       const data = await response.json();
 
@@ -300,23 +301,23 @@ export default function ContactUs() {
           <h3 className="text-xl font-bold mb-4">Other Ways to Reach Us</h3>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8">
             <a 
-              href="mailto:support@gamestore.com" 
+              href="mailto:gxplorer.contact@gmail.com" 
               className="text-purple-400 hover:text-purple-300 transition-colors flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
-              support@gamestore.com
+              gxplorer.contact@gmail.com
             </a>
             <span className="text-gray-500 hidden sm:block">|</span>
             <a 
-              href="tel:+1234567890" 
+              href="tel:+923324261648" 
               className="text-purple-400 hover:text-purple-300 transition-colors flex items-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
               </svg>
-              (123) 456-7890
+              03324261648
             </a>
           </div>
         </motion.div>

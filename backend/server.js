@@ -2,6 +2,8 @@ const express = require('express');
 const sql = require('mssql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -339,6 +341,37 @@ app.get('/game/:name/requirements', async (req, res) => {
     } catch (err) {
         console.error('Error fetching requirements:', err);
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/contact', async (req, res) => {
+    const { name, email, subject, message } = req.body;
+    console.log(name, email, subject, message)
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    try {
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: email,
+            to: process.env.RECEIVER_EMAIL,
+            subject: `New Contact Us Message from ${name}`,
+            text: `From: ${name} <${email}>\n\nSubject: ${subject}\n\n${message}`
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'Email sent successfully' });
+    } catch (error) {
+        console.error('Email send error:', error);
+        res.status(500).json({ error: 'Failed to send email' });
     }
 });
 
