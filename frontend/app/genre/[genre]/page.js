@@ -143,7 +143,7 @@ const GenrePage = () => {
                                     )}
                                 </div>
 
-                                <div className="pt-2 pb-2 pl-2 text-[18px]">
+                                <div className="p-3 text-[18px]">
                                     <h1>{game.name}</h1>
                                 </div>
                             </div>

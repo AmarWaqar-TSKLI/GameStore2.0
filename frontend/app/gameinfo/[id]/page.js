@@ -283,6 +283,8 @@ export default function GameDetailsPage() {
 
     if (!game) return <div className="text-white p-10">Loading... {id}</div>;
 
+    const avgRating = calculateAverageRating();
+
     return (
         <div className="bg-[#0b0c10] text-white w-full h-screen">
             <ToastContainer position="bottom-right" autoClose={3000} />
@@ -296,7 +298,7 @@ export default function GameDetailsPage() {
                     <span className="bg-indigo-900/50 px-3 py-1 rounded-full">{game.genre}</span>
                     <span className="flex items-center">
                         <FaStar className="text-yellow-400 mr-1" />
-                        {game.rating}/5
+                        {avgRating}/5
                     </span>
                 </div>
             </div>
@@ -311,7 +313,7 @@ export default function GameDetailsPage() {
                                 src={convertToEmbedUrl(game.trailer_url)}
                                 title="Game Trailer"
                                 className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture sound"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture "
                                 allowFullScreen
                             />
                         ) : (
@@ -511,7 +513,7 @@ export default function GameDetailsPage() {
                                         {star <= (hoverStar || newReview.stars) ? <FaStar /> : <FaRegStar />}
                                     </button>
                                 ))}
-                                <span className="ml-3 text-gray-400 self-center">
+                                <span className="ml-3 mt-1 text-gray-400 self-center">
                                     {newReview.stars > 0 ? `${newReview.stars} star${newReview.stars > 1 ? 's' : ''}` : 'Rate this game'}
                                     {userReview && newReview.stars !== userReview.Stars && (
                                         <span className="ml-2 text-yellow-300 text-sm">(Previously: {userReview.Stars} stars)</span>

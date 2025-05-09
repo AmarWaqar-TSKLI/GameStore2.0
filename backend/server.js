@@ -12,7 +12,7 @@ app.use(express.json());
 const config = {
     user: "HP",
     password: "t6k1#90g",
-    server: "DESKTOP-S97IIEF\\SQLEXPRESS",
+    server: "DESKTOP-5HVS36C\\SQLEXPRESS",
     database: "GameStore",
     options: {
         enableArithAbort: true,
@@ -59,6 +59,33 @@ app.get('/Games', async (req, res) => {
     }
 });
 
+app.get('/SearchGames', async (req, res) => {
+    try {
+        const { search } = req.query;
+        
+        if (!search) {
+            return res.status(400).json({ error: 'Search query is required' });
+        }
+
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input('search', sql.VarChar, `%${search}%`)
+            .query(`
+                SELECT Games.game_id, cover_path, name, genre, description, rating 
+                FROM Games 
+                JOIN Media ON Games.game_id = Media.game_id 
+                WHERE name LIKE @search OR genre LIKE @search
+                ORDER BY Games.game_id
+            `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+ 
 // Get wishlist games for a user
 app.get('/Wishlist/:userId', async (req, res) => {
     const userId = req.params.userId;

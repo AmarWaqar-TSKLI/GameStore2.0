@@ -5,11 +5,13 @@ import { FiX } from "react-icons/fi";
 import { isAuthenticated, getCurrentUser } from "@/utils/auth";
 
 const Page = () => {
-    const [games, setGames] = useState([]);
+    const [allGames, setAllGames] = useState([]);
     const [filteredGames, setFilteredGames] = useState([]);
     const [wishlistMap, setWishlistMap] = useState({});
     const [page, setPage] = useState(1);
     const [hasNextPage, setHasNextPage] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const limit = 18;
     const scrollRef = useRef(null);
     const searchParams = useSearchParams();
@@ -17,29 +19,43 @@ const Page = () => {
     const searchQuery = searchParams.get('search') || '';
 
     const fetchGames = async (pageNumber) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Games?page=${pageNumber}&limit=${limit}`);
+            let url;
+            if (searchQuery) {
+                url = `${process.env.NEXT_PUBLIC_BASE_URL}/SearchGames?search=${encodeURIComponent(searchQuery)}`;
+            } else {
+                url = `${process.env.NEXT_PUBLIC_BASE_URL}/Games?page=${pageNumber}&limit=${limit}`;
+            }
+
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
-            setGames(data || []);
-            filterGames(data || [], searchQuery);
-            setHasNextPage(data?.length === limit);
+            
+            if (searchQuery) {
+                setAllGames(data || []);
+                setFilteredGames(data || []);
+                setHasNextPage(false);
+            } else {
+                setAllGames(data || []);
+                setFilteredGames(data || []);
+                setHasNextPage(data?.length === limit);
+            }
         } catch (error) {
             console.error("Error fetching games:", error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
         }
-    };
-
-    const filterGames = (gamesList, query) => {
-        if (!query) {
-            setFilteredGames(gamesList);
-            return;
-        }
-        const filtered = gamesList.filter(game =>
-            game.name.toLowerCase().includes(query.toLowerCase())
-        );
-        setFilteredGames(filtered);
     };
 
     const clearSearch = () => {
+        setPage(1);
         router.push('/games');
     };
 
@@ -82,11 +98,7 @@ const Page = () => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
         }
-    }, [page]);
-
-    useEffect(() => {
-        filterGames(games, searchQuery);
-    }, [searchQuery, games]);
+    }, [page, searchQuery]);
 
     return (
         <div className="h-screen bg-slate-950 flex flex-col overflow-hidden">
@@ -94,7 +106,7 @@ const Page = () => {
                 <div className="p-4 text-white flex items-center justify-between">
                     <h2 className="text-xl font-semibold">
                         Search results for: <span className="text-indigo-400">"{searchQuery}"</span>
-                        {filteredGames.length === 0 && (
+                        {filteredGames.length === 0 && !loading && (
                             <span className="text-gray-400 ml-2">- No games found</span>
                         )}
                     </h2>
@@ -108,6 +120,18 @@ const Page = () => {
             )}
 
             <h1 className="text-2xl font-bold p-4 text-white">All Games</h1>
+
+            {loading && (
+                <div className="flex justify-center items-center p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+            )}
+
+            {error && (
+                <div className="p-4 text-red-500">
+                    Error loading games: {error}
+                </div>
+            )}
 
             <div ref={scrollRef} className="flex-grow overflow-y-auto p-3 custom-scrollbar">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -123,6 +147,10 @@ const Page = () => {
                                         src={game.cover_path} 
                                         className="object-cover w-full h-[280px] rounded-t-lg" 
                                         alt={game.name} 
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = '/placeholder-game.jpg';
+                                        }}
                                     />
                                 </div>
 
@@ -143,13 +171,13 @@ const Page = () => {
                                     )}
                                 </div>
 
-                                <div className="pt-2 pb-2 pl-2 text-[18px]">
-                                    <h1>{game.name}</h1>
+                                <div className="p-3 text-[18px]">
+                                    <h1 className="truncate">{game.name}</h1>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <p className="mt-4 text-gray-400 col-span-full">No games found.</p>
+                        !loading && <p className="mt-4 text-gray-400 col-span-full">No games found.</p>
                     )}
                 </div>
 
