@@ -27,7 +27,7 @@ export default function SignIn() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:1000/signin', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/signin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

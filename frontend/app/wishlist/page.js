@@ -18,7 +18,7 @@ const WishlistPage = () => {
             return;
         }
 
-        fetch(`http://localhost:1000/Wishlist/${user.UID}`)
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Wishlist/${user.UID}`)
             .then((response) => response.json())
             .then((data) => {
                 setGames(data || []);
@@ -33,7 +33,7 @@ const WishlistPage = () => {
     const handleRemoveFromWishlist = (gameId) => {
         if (!user) return;
 
-        fetch(`http://localhost:1000/Wishlist/${user.UID}/${gameId}`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Wishlist/${user.UID}/${gameId}`, {
             method: "DELETE"
         })
             .then(response => {

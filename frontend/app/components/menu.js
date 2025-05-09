@@ -77,7 +77,7 @@ const Menu = ({ width }) => {
 
   return (
     <div
-      className={`${width} h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col border-r border-gray-800 transition-all duration-500 ${isHovering ? 'shadow-2xl shadow-red-900/30' : ''}`}
+      className={`${width} z-10 h-screen bg-gradient-to-b from-black to-gray-900 flex flex-col border-r border-gray-800 transition-all duration-500 ${isHovering ? 'shadow-2xl shadow-red-900/30' : ''}`}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >

@@ -31,7 +31,7 @@ export default function AboutUs() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   return (
-    <div className="h-full overflow-hidden bg-slate-950 text-white p-10 flex flex-col justify-between">
+    <div className="h-full overflow-auto sm:overflow-hidden bg-slate-950 text-white p-10 flex flex-col justify-between ">
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}

@@ -18,7 +18,7 @@ const Page = () => {
 
     const fetchGames = async (pageNumber) => {
         try {
-            const response = await fetch(`http://localhost:1000/Games?page=${pageNumber}&limit=${limit}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Games?page=${pageNumber}&limit=${limit}`);
             const data = await response.json();
             setGames(data || []);
             filterGames(data || [], searchQuery);

@@ -21,7 +21,7 @@ const GenrePage = () => {
     const fetchGames = async (pageNumber) => {
         try {
             if (!genre) return;
-            const response = await fetch(`http://localhost:1000/games/${genre}?page=${pageNumber}&limit=${limit}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/games/${genre}?page=${pageNumber}&limit=${limit}`);
             const data = await response.json();
             setGames(data || []);
             filterGames(data || [], searchQuery);
@@ -55,7 +55,7 @@ const GenrePage = () => {
         const user = getCurrentUser();
         if (!user) return;
 
-        fetch("http://localhost:1000/WishlistInsertion", {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/WishlistInsertion`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

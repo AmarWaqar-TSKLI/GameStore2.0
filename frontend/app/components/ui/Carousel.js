@@ -41,7 +41,7 @@ const Slide = ({ game, index, current, handleSlideClick }) => {
     <div className="[perspective:500px] [transform-style:preserve-3d] ">
       <li
         ref={slideRef}
-        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 transition-all duration-300 ease-in-out w-[70vmin] h-[70vmin] mx-[10vmin] z-10 "
+        className="flex flex-1 flex-col items-center justify-center relative text-center text-white opacity-100 transition-all duration-300 ease-in-out w-[50vmin] h-[70vmin] sm:w-[50vmin] sm:h-[50vmin] md:w-[70vmin] md:h-[70vmin] mx-[5vmin] sm:mx-[10vmin] z-10"
         onClick={() => handleSlideClick(index)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -95,7 +95,9 @@ export function Carousel() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:1000/Games")
+    // fetch("http://192.168.100.15:1000/Games")
+
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/Games`)
       .then((response) => response.json())
       .then((data) => setGames(data))
       .catch((error) => console.error("Error fetching data:", error));
@@ -125,7 +127,7 @@ export function Carousel() {
 
   const handleSlideClick = (index) => {
     if (current == index) {
-    router.push(`/gameinfo/${games[index].game_id}`); // Use games[index] to get the current game
+      router.push(`/gameinfo/${games[index].game_id}`); // Use games[index] to get the current game
     }
     setCurrent(index);
     resetTimer();
@@ -145,8 +147,8 @@ export function Carousel() {
   return (
     <div className="relative w-[80vmin] h-[60vh] mx-auto" aria-labelledby={`carousel-heading-${id}`}>
       <ul
-        className="absolute flex gap-x-36 mx-[-6vmin] transition-transform duration-1000 ease-in-out"
-        style={{ transform: `translateX(calc(-${current * (100 / games.length)}% - ${current * 1}vmin - 0.2% ))` }}>
+        className="absolute flex gap-x-20 md:gap-x-36 mx-[-6vmin] transition-transform duration-1000 ease-in-out left-[18vmin] sm:left-[16vmin] md:left-0 lg:left-0"
+        style={{ transform: `translateX(calc(-${current * (100 / games.length)}% - ${current * 1}vmin - 0.2% ))`}}>
         {games.map((game, index) => (
           <Slide key={game.game_id} game={game} index={index} current={current} handleSlideClick={handleSlideClick} />
         ))}

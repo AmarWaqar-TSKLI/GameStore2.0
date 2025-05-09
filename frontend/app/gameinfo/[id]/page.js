@@ -41,7 +41,7 @@ export default function GameDetailsPage() {
 
         const fetchGame = async () => {
             try {
-                const res = await fetch(`http://localhost:1000/game/${id}`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/game/${id}`);
                 if (!res.ok) throw new Error("Failed to fetch game data");
                 const data = await res.json();
                 setGame(data);
@@ -58,7 +58,7 @@ export default function GameDetailsPage() {
 
         const fetchRequirements = async () => {
             try {
-                const res = await fetch(`http://localhost:1000/game/${game.name}/requirements`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/game/${game.name}/requirements`);
                 if (!res.ok) throw new Error("Failed to fetch requirements");
                 const data = await res.json();
                 setRequirements(data);
@@ -69,7 +69,7 @@ export default function GameDetailsPage() {
 
         const fetchReviews = async () => {
             try {
-                const res = await fetch(`http://localhost:1000/review/${game.game_id}`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/${game.game_id}`);
                 if (!res.ok) throw new Error("Failed to fetch reviews");
                 const data = await res.json();
                 setReviews(data);
@@ -172,7 +172,7 @@ export default function GameDetailsPage() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(`http://localhost:1000/review/${user.UID}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/${user.UID}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -236,7 +236,7 @@ export default function GameDetailsPage() {
 
             const user = getCurrentUser();
             try {
-                const res = await fetch(`http://localhost:1000/wishlist/${user.UID}`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/wishlist/${user.UID}`);
                 if (!res.ok) throw new Error("Failed to fetch wishlist");
 
                 const wishlist = await res.json();
@@ -262,7 +262,7 @@ export default function GameDetailsPage() {
 
         const user = getCurrentUser();
         try {
-            const res = await fetch("http://localhost:1000/WishlistInsertion", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/WishlistInsertion`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_id: user.UID, game_id: game.game_id }),
@@ -289,7 +289,7 @@ export default function GameDetailsPage() {
 
             {/* GAME HEADER SECTION */}
             <div className="pt-8 px-8">
-                <h2 className="text-5xl font-bold mb-2 bg-gradient-to-r from-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                <h2 className="text-3xl sm:font-3xl font-bold mb-2 bg-gradient-to-r from-indigo-300 to-purple-400 bg-clip-text text-transparent w-full">
                     {game.name}
                 </h2>
                 <div className="flex items-center space-x-4 text-sm text-gray-400 mb-6">
@@ -302,9 +302,9 @@ export default function GameDetailsPage() {
             </div>
 
             {/* MAIN CONTENT SECTION */}
-            <div className='flex flex-col lg:flex-row justify-between px-8 pb-8 gap-8'>
+            <div className='flex flex-col lg:flex-row justify-between px-8 pb-8 gap-8 w-full'>
                 {/* MAIN PREVIEW AREA */}
-                <div className="w-[65%] space-y-6">
+                <div className="w-full lg:w-[70%] space-y-6">
                     <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl relative group">
                         {activeIndex === 0 && game.trailer_url ? (
                             <iframe
@@ -370,15 +370,15 @@ export default function GameDetailsPage() {
                 </div>
 
                 {/* SIDEBAR INFO */}
-                <div className="w-[32%] bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-800/50 self-start">
+                <div className="w-full lg:w-[28%] bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-800/50 self-start">
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-xl font-semibold mb-3 text-gray-200">About the Game</h3>
-                            <p className="text-gray-300 text-sm leading-relaxed overflow-y-auto custom-scrollbar"
-                                style={{
-                                    height: 'calc(100vh * 0.5625)' // 16:9 aspect ratio (9/16 = 0.5625)
-                                }}
-                            >{game.description}</p>
+                            {/* Description with responsive height */}
+                            <p className="text-gray-300 text-sm leading-relaxed overflow-y-auto custom-scrollbar max-h-[50vh] md:max-h-[60vh] lg:max-h-[calc(100vh*0.5625)] pr-2">
+                                {game.description}
+                            </p>
+
                         </div>
 
                         <button
@@ -451,7 +451,7 @@ export default function GameDetailsPage() {
             </div>
             {/* REVIEWS SECTION */}
             <div className="px-8 pb-12 w-full">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-between flex-wrap gap-3 sm:gap-0 items-center mb-8">
                     <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-600 bg-clip-text text-transparent">
                         Player Reviews
                     </h2>
