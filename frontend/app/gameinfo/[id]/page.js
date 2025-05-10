@@ -24,17 +24,14 @@ export default function GameDetailsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [userReview, setUserReview] = useState(null);
     const reviewInputRef = useRef(null);
-    // Add these to your component's state and refs
     const [isTrailerPlaying, setIsTrailerPlaying] = useState(true);
     const [isInWishlist, setIsInWishlist] = useState(false);
 
-    // Add this useEffect to handle play/pause state changes
     useEffect(() => {
         if (activeIndex === 0 && game?.trailer_url) {
             setIsTrailerPlaying(isPlaying);
         }
     }, [isPlaying, activeIndex, game?.trailer_url]);
-
 
     useEffect(() => {
         if (!id) return;
@@ -69,16 +66,14 @@ export default function GameDetailsPage() {
 
         const fetchReviews = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/${game.game_id}`);
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/${game.game_id}?nocache=${Date.now()}`);
                 if (!res.ok) throw new Error("Failed to fetch reviews");
                 const data = await res.json();
                 setReviews(data);
 
-                // Check if current user has already reviewed
                 if (isAuthenticated()) {
                     const user = getCurrentUser();
                     const existingReview = data.find(r => r.UID === user.UID);
-                    console.log(data);
                     if (existingReview) {
                         setUserReview(existingReview);
                         setNewReview({
@@ -189,24 +184,24 @@ export default function GameDetailsPage() {
                 return;
             }
 
-            // Find the current user's review in the response
             const currentUserReview = result.find(r => r.UID === user.UID);
-            console.log(currentUserReview, result)
             if (!currentUserReview) {
                 throw new Error("Failed to find submitted review in response");
             }
 
-            // Update both reviews list and userReview state
             setReviews(result);
             setUserReview(currentUserReview);
-
-            // Update the form fields immediately with the submitted values
             setNewReview({
                 comment: currentUserReview.Comment,
                 stars: currentUserReview.Stars
             });
 
             toast.success('Review submitted successfully!');
+            
+            // Trigger carousel refresh
+            window.dispatchEvent(new CustomEvent('reviewSubmitted', {
+                detail: { gameId: game.game_id }
+            }));
 
         } catch (error) {
             console.error("Error:", error);
@@ -258,7 +253,7 @@ export default function GameDetailsPage() {
             return;
         }
 
-        if (isInWishlist) return; // Already added
+        if (isInWishlist) return;
 
         const user = getCurrentUser();
         try {
@@ -277,9 +272,6 @@ export default function GameDetailsPage() {
             toast.error('Could not add to wishlist');
         }
     };
-
-
-
 
     if (!game) return <div className="text-white p-10">Loading... {id}</div>;
 
@@ -313,7 +305,7 @@ export default function GameDetailsPage() {
                                 src={convertToEmbedUrl(game.trailer_url)}
                                 title="Game Trailer"
                                 className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture "
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             />
                         ) : (
@@ -376,11 +368,9 @@ export default function GameDetailsPage() {
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-xl font-semibold mb-3 text-gray-200">About the Game</h3>
-                            {/* Description with responsive height */}
                             <p className="text-gray-300 text-sm leading-relaxed overflow-y-auto custom-scrollbar max-h-[50vh] md:max-h-[60vh] lg:max-h-[calc(100vh*0.5625)] pr-2">
                                 {game.description}
                             </p>
-
                         </div>
 
                         <button
@@ -392,11 +382,9 @@ export default function GameDetailsPage() {
                         >
                             {isInWishlist ? '✓ Added to Wishlist' : 'Add to Wishlist'}
                         </button>
-
                     </div>
                 </div>
             </div>
-
 
             {/* SYSTEM REQUIREMENTS */}
             <div className="px-8 pb-12 w-full mt-3">
@@ -451,6 +439,7 @@ export default function GameDetailsPage() {
                     </div>
                 </div>
             </div>
+
             {/* REVIEWS SECTION */}
             <div className="px-8 pb-12 w-full">
                 <div className="flex justify-between flex-wrap gap-3 sm:gap-0 items-center mb-8">
@@ -478,7 +467,6 @@ export default function GameDetailsPage() {
                 <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-gray-800/50 shadow-lg">
                     <form onSubmit={handleReviewSubmit}>
                         <div className="mb-6">
-                            {/* Add this notification banner */}
                             {userReview && (
                                 <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 mb-4 flex items-start">
                                     <div className="flex-shrink-0 mt-0.5">

@@ -1,10 +1,9 @@
-// app/signin/page.js
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function SignIn() {
+const SignInContent = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -53,7 +52,6 @@ export default function SignIn() {
     <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-gray-800 rounded-lg shadow-lg p-8 border border-purple-600 relative">
         <div className="absolute inset-y-0 right-5 top-5  ">
-          {/* create a cross instead of a Plus */}
           <svg
             onClick={() => router.push('/')}
             xmlns="http://www.w3.org/2000/svg"
@@ -130,4 +128,14 @@ export default function SignIn() {
       </div>
     </div>
   );
-}
+};
+
+const Page = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center">Loading...</div>}>
+      <SignInContent />
+    </Suspense>
+  );
+};
+
+export default Page;

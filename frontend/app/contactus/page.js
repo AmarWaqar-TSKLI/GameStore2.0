@@ -86,7 +86,7 @@ useEffect(() => {
     setSubmitStatus({ success: false, message: '' });
 
     try {
-      const response = await fetch('http://localhost:1000/contact', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

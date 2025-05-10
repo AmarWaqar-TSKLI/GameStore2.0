@@ -123,7 +123,7 @@ const Menu = ({ width }) => {
               {/* Icon with bounce animation */}
               <div className={`relative z-10 ${selectedGenre === genre ? 'animate-bounce' : 'hover:animate-pulse'}`}>
                 <img
-                  src={`/icons/${genre.toLowerCase()}.png`}
+                  src={`/Icons/${genre.toLowerCase()}.png`}
                   alt={`${genre} icon`}
                   className={`w-5 h-5 transition-all duration-300 ${selectedGenre === genre ? "scale-125" : "hover:scale-110"}`}
                 />

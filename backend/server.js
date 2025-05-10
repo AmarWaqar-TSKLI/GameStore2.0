@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 const config = {
-    user: "HP",
+    user: "HP2.0",
     password: "t6k1#90g",
     server: "DESKTOP-5HVS36C\\SQLEXPRESS",
     database: "GameStore",
@@ -34,7 +34,41 @@ app.get('/Users', async (req, res) => {
     }
 });
 
+// Get average ratings and review counts for all games
+app.get('/GameRatings', async (req, res) => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request().query(`
+            SELECT 
+                g.game_id,
+                COALESCE(AVG(CAST(r.Stars AS FLOAT)), 0) AS avg_rating,
+                COUNT(r.ReviewID) AS review_count
+            FROM 
+                Games g
+            LEFT JOIN 
+                Reviews r ON g.game_id = r.GameID
+            GROUP BY 
+                g.game_id
+            ORDER BY 
+                avg_rating DESC
+        `);
 
+        // Set headers to prevent caching
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+        
+        res.json(result.recordset.map(item => ({
+            game_id: item.game_id,
+            avg_rating: parseFloat(item.avg_rating),
+            review_count: item.review_count
+        })));
+    } catch (err) {
+        console.error('Error fetching game ratings:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Update your existing Games endpoint
 app.get('/Games', async (req, res) => {
     try {
         const { page = 1, limit = 18 } = req.query;
@@ -45,14 +79,37 @@ app.get('/Games', async (req, res) => {
             .input('limit', sql.Int, parseInt(limit))
             .input('offset', sql.Int, parseInt(offset))
             .query(`
-                SELECT Games.game_id, cover_path, name, genre, description, rating FROM Games 
+                SELECT 
+                    Games.game_id, 
+                    cover_path, 
+                    name, 
+                    genre, 
+                    description, 
+                    rating,
+                    (SELECT COALESCE(AVG(CAST(Stars AS FLOAT)), 0) 
+                     FROM Reviews 
+                     WHERE GameID = Games.game_id) AS avg_rating,
+                    (SELECT COUNT(ReviewID) 
+                     FROM Reviews 
+                     WHERE GameID = Games.game_id) AS review_count
+                FROM Games 
                 JOIN Media ON Games.game_id = Media.game_id 
-                ORDER BY Games.game_id 
+                ORDER BY avg_rating DESC
                 OFFSET @offset ROWS 
                 FETCH NEXT @limit ROWS ONLY
             `);
 
-        res.json(result.recordset);
+        // Set cache-control headers
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+
+        // Convert avg_rating to number
+        const games = result.recordset.map(game => ({
+            ...game,
+            avg_rating: parseFloat(game.avg_rating)
+        }));
+
+        res.json(games);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -1,4 +1,5 @@
 // utils/auth.js
+"use client";
 export const isAuthenticated = () => {
     if (typeof window !== 'undefined') {
       const user = localStorage.getItem('user');
