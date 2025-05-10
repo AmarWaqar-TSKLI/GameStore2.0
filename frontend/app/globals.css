@@ -20,6 +20,9 @@
 .sidebar {
   height: calc(var(--vh));
 }
+* {
+  user-select: none;
+}
 
 body {
   color: var(--foreground);
